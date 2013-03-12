@@ -34,8 +34,13 @@ Discuz X2 贴子处理器
 
     #初始化
 
-    my $bbs = BBS::DiscuzX2->new(
+    my $bbs = BBS::DiscuzX2->new();
+    
+    #初始化后台数据库连接
 
+    #dp_port / db_charset 也可不填
+
+    $bbs->init_db_handler(
         db_host => 'xxx.xxx.xxx.xxx',
 
         db_port => 3306, 
@@ -46,11 +51,8 @@ Discuz X2 贴子处理器
 
         db_name => 'xxx',
 
-        default_passwd => 'yyy', 
-
+        db_charset => 'utf8', 
     );
-    
-    $bbs->init_db_handler();
     
 =over
 
@@ -61,6 +63,8 @@ Discuz X2 贴子处理器
     #新建论坛用户
 
     #mail/user_ip可不填，如果passwd未指定，则采用default_passwd作为初始密码
+
+    $bbs->{default_passwd} = 'ashaxj';
 
     my $uid = $bbs->create_user({
 
@@ -138,18 +142,18 @@ has db_passwd => ( is => 'rw' );
 has db_name => ( is => 'rw' );
 
 sub init_db_handler {
-    my ($self) = @_;
-    $self->{db_port} ||= 3306;
+    my ($self, %db_opt) = @_;
+    $db_opt{db_port} ||= 3306;
 
-    my $dsn      = "DBI:mysql:host=$self->{db_host};port=$self->{db_port};database=$self->{db_name}";
-    $self->{db_handler} = BBS::DiscuzX2::DB->new(
-        connect_info => [ $dsn, $self->{db_user}, $self->{db_passwd} ]
+    my $dsn      = "DBI:mysql:host=$db_opt{db_host};port=$db_opt{db_port};database=$db_opt{db_name}";
+    $db_opt{db_handler} = BBS::DiscuzX2::DB->new(
+        connect_info => [ $dsn, $db_opt{db_user}, $db_opt{db_passwd} ]
     );
 
-    if($self->{db_charset}){
-        $self->{db_handler}->do("SET character_set_client='$self->{db_charset}'");
-        $self->{db_handler}->do("SET character_set_connection='$self->{db_charset}'");
-        $self->{db_handler}->do("SET character_set_results='$self->{db_charset}'");
+    if($db_opt{db_charset}){
+        $db_opt{db_handler}->do("SET character_set_client='$db_opt{db_charset}'");
+        $db_opt{db_handler}->do("SET character_set_connection='$db_opt{db_charset}'");
+        $db_opt{db_handler}->do("SET character_set_results='$db_opt{db_charset}'");
     }
 
     $self;

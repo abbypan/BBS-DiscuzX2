@@ -167,13 +167,14 @@ sub load_forum_post {
 package BBS::DiscuzX2::DB::Schema;
 use Teng::Schema::Declare;
 
-#新建贴子
+#贴子内容
 table {
     name 'pre_forum_post';
     columns
     qw( fid tid first author authorid subject dateline message useip htmlon bbcodeoff);
 };
 
+#贴子索引
 table {
     name 'pre_forum_thread';
     columns
