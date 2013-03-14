@@ -4,6 +4,10 @@ use parent 'Teng';
 use Digest::MD5 qw(md5_hex);
 use Date::Calc qw(Mktime);
 our @SALT_CHARS  = ( 0 .. 9, 'a' .. 'z' );
+our $DEFAULT_MAIL = 'xxx@xxx.com';
+our $DEFAULT_USER_IP = '0.0.0.0';
+our $DEFAULT_PASSWD = 'ashaxj';
+our $DEFAULT_GROUP_ID = 10;
 
 sub create_user {
     my ( $self, $data ) = @_;
@@ -11,10 +15,8 @@ sub create_user {
     my $uid = $self->check_username($data->{user});
     return $uid if ($uid);
 
-    print "create user : $data->{user}\n";
-
     my $salt = $self->mksalt();
-    my $passwd = md5_hex( md5_hex( $data->{passwd} || $self->{default_passwd} ) . $salt );
+    my $passwd = md5_hex( md5_hex( $data->{passwd} || $self->{default_passwd} || $DEFAULT_PASSWD ) . $salt );
 
     my $time = time();
     $self->insert(
@@ -22,8 +24,8 @@ sub create_user {
         +{
             username => $data->{user},
             password => $passwd,
-            email    => $data->{mail} || 'xxx@xxx.xxx',
-            regip    => $data->{user_ip} || '0.0.0.0',
+            email    => $data->{mail} || $DEFAULT_MAIL,
+            regip    => $data->{user_ip} || $DEFAULT_USER_IP,
             regdate  => $time,
             salt     => $salt,
         }
@@ -38,11 +40,11 @@ sub create_user {
         'pre_common_member',
         +{
             uid        => $uid,
-            email      => $data->{mail},
+            email      => $data->{mail} || $DEFAULT_MAIL,
             username   => $data->{user},
             password   => $passwd,
+            groupid    => $data->{group_id} // $self->{default_group_id} // $DEFAULT_GROUP_ID,
             regdate    => $time,
-            groupid    => $data->{groupid},
             adminid    => $data->{is_admin} || 0,
             timeoffset => $data->{time_offset} || 0,
         }
@@ -78,8 +80,6 @@ sub mksalt {
 
 sub load_thread {
     my ( $self, $data ) = @_;
-
-    print "load thread to fid $data->{fid}\n";
 
     $_->{dateline} = $self->make_time_dateline($_->{dateline}) for @{$data->{floors}};
     
@@ -150,10 +150,10 @@ sub load_forum_post {
             first     => $i > 0 ? 0 : 1,
             author    => $author,
             authorid  => $author_to_id{$author},
-            subject   => $r->{subject},
+            subject   => $r->{subject} || '',
             dateline  => $r->{dateline},
             message   => $r->{message},
-            useip     => $r->{user_ip} || '',
+            useip     => $r->{user_ip} || $DEFAULT_USER_IP,
             htmlon    => $r->{is_html} || 0,
             bbcodeoff => ! $r->{is_bbcode} || 0,
         );
