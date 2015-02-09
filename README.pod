@@ -47,9 +47,9 @@ L<BBS::DiscuzX2> Discuz X2 贴子处理器
 
     #mail/user_ip可不填
 
-    $bbs->{db_handler}{default_passwd} = 'ashaxj';
+    $bbs->{dbh}{default_passwd} = 'ashaxj';
 
-    $bbs->{db_handler}{default_group_id} = 10;
+    $bbs->{dbh}{default_group_id} = 10;
 
     my $uid = $bbs->create_user({
 
@@ -164,5 +164,28 @@ L<BBS::DiscuzX2> Discuz X2 贴子处理器
             pid => 9, 
 
         });
+
+=head2 get_forum_forum
+
+版块列表
+
+    my $rows= $bbs->{dbh}->get_forum_forum();
+
+    # $row->{fid} , $row->{name}
+
+=head2 get_forum_thread
+
+指定版块的贴子列表
+
+    my $threads= $bbs->{dbh}->get_forum_thread($fid);
+
+    # $thread->{tid}, $thread->{author}, $thread->{subject}
+
+=head2 get_forum_post 
+
+指定贴子的楼层列表
+
+    my $posts = $bbs->{dbh}->get_forum_post($fid, $tid);
+    # $post->{dateline}, $post->{author}, $post->{message}
 
 =cut

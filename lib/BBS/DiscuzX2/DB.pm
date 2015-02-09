@@ -9,6 +9,33 @@ our $DEFAULT_USER_IP = '0.0.0.0';
 our $DEFAULT_PASSWD = 'ashaxj';
 our $DEFAULT_GROUP_ID = 10;
 
+sub get_forum_post {
+    my ( $self, $fid , $tid ) = @_;
+    my @rows = $self->search_by_sql( 
+            qq[select author,dateline,message 
+            from pre_forum_post 
+            where tid=$tid and fid=$fid 
+            order by dateline]
+    );
+    return \@rows;
+}
+
+sub get_forum_thread {
+    my ( $self, $fid ) = @_;
+    my @rows = $self->search_by_sql( qq[select *
+        from pre_forum_thread
+        where fid=$fid]);
+    return \@rows;
+}
+
+sub get_forum_forum {
+    my ( $self ) = @_;
+    my @rows = $self->search_by_sql( qq[select *
+        from pre_forum_forum
+        where threads > 0]);
+    return \@rows;
+}
+
 sub create_user {
     my ( $self, $data ) = @_;
 
@@ -167,11 +194,11 @@ sub load_forum_post {
 package BBS::DiscuzX2::DB::Schema;
 use Teng::Schema::Declare;
 
-#贴子内容
+#版块列表
 table {
-    name 'pre_forum_post';
-    columns
-    qw( fid tid first author authorid subject dateline message useip htmlon bbcodeoff);
+    name 'pre_forum_forum';
+    columns qw/fid name threads/;
+
 };
 
 #贴子索引
@@ -179,6 +206,13 @@ table {
     name 'pre_forum_thread';
     columns
     qw(tid fid author authorid subject dateline lastpost lastposter replies);
+};
+
+#贴子内容
+table {
+    name 'pre_forum_post';
+    columns
+    qw( fid tid first author authorid subject dateline message useip htmlon bbcodeoff);
 };
 
 #激活用户

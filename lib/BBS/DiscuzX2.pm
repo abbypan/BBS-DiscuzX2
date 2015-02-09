@@ -109,32 +109,32 @@ sub init_db_handler {
     $db_opt{db_port} ||= 3306;
 
     my $dsn      = "DBI:mysql:host=$db_opt{db_host};port=$db_opt{db_port};database=$db_opt{db_name}";
-    $self->{db_handler} = BBS::DiscuzX2::DB->new(
+    $self->{dbh} = BBS::DiscuzX2::DB->new(
         connect_info => [ $dsn, $db_opt{db_user}, $db_opt{db_passwd} ]
     );
 
     if($db_opt{db_charset}){
-        $self->{db_handler}->do("SET character_set_client='$db_opt{db_charset}'");
-        $self->{db_handler}->do("SET character_set_connection='$db_opt{db_charset}'");
-        $self->{db_handler}->do("SET character_set_results='$db_opt{db_charset}'");
+        $self->{dbh}->do("SET character_set_client='$db_opt{db_charset}'");
+        $self->{dbh}->do("SET character_set_connection='$db_opt{db_charset}'");
+        $self->{dbh}->do("SET character_set_results='$db_opt{db_charset}'");
     }
 
     for my $k (qw/default_passwd default_group_id/){
         next unless(exists $db_opt{$k});
-        $self->{db_handler}{$k} = $db_opt{$k};
+        $self->{dbh}{$k} = $db_opt{$k};
     }
 
-    $self;
+    $self->{dbh};
 }
 
 sub create_user {
     my ($self,$data) = @_;
-    $self->{db_handler}->create_user($data);
+    $self->{dbh}->create_user($data);
 }
 
 sub load_thread {
     my ($self,$data) = @_;
-    $self->{db_handler}->load_thread($data);
+    $self->{dbh}->load_thread($data);
 }
 
 1;
